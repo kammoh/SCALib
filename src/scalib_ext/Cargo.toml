@@ -6,4 +6,4 @@ members = [
     "ranklib",
     "scalib-py"
 ]
-resolver = "2"
+# resolver = "2"
