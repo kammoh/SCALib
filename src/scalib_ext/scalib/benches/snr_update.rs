@@ -19,6 +19,8 @@ fn bench_snr_update(c: &mut Criterion) {
     let nc = 256;
     let n = 10000;
 
+    let config = scalib::Config::default();
+
     for i in [32, 64] {
         let mut group = c.benchmark_group(format!("snr_update_{}", i));
         for ns in [10, 16].iter().map(|x| 2.0_f64.powi(*x) as usize) {
@@ -33,7 +35,7 @@ fn bench_snr_update(c: &mut Criterion) {
                         &ns,
                         |b, ns| {
                             b.iter(|| {
-                                snr.update(x.view(), y.view());
+                                let _ = snr.update(x.view(), y.view(), &config);
                             })
                         },
                     );
@@ -45,7 +47,7 @@ fn bench_snr_update(c: &mut Criterion) {
                         &ns,
                         |b, ns| {
                             b.iter(|| {
-                                snr.update(x.view(), y.view());
+                                let _ = snr.update(x.view(), y.view(), &config);
                             })
                         },
                     );

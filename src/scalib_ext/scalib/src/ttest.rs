@@ -42,7 +42,7 @@ impl UniCSAcc {
             moments: Array3::<f64>::zeros((nc, d, ns)),
         }
     }
-    /// Merges the current accumulator with anoter sum of
+    /// Merges the current accumulator with another sum of
     /// centered products
     /// moments_other : (nc,d,ns) matrix
     /// n_traces : (nc,) matrix
@@ -52,7 +52,7 @@ impl UniCSAcc {
     // for additional details about the merging algorithm.
     //
     // Q0 set of all the traces in current estimation
-    // Q1 set of all the traces in the estiamation to merge
+    // Q1 set of all the traces in the estimation to merge
     // Q = Q0 U Q1 is the merge of all traces
     //
     // Definitions:

@@ -8,6 +8,7 @@ fn bench_get_snr(c: &mut Criterion) {
     let nc = 256;
     let np = 16;
     let n = 1000;
+    let config = scalib::Config::default();
     for i in [32, 64] {
         let mut group = c.benchmark_group(format!("get_snr_{}", i));
         for ns in [1000, 10000, 100000].iter() {
@@ -15,7 +16,7 @@ fn bench_get_snr(c: &mut Criterion) {
             let y = Array2::<u16>::random((np, n), Uniform::new(0, nc as u16));
             if i == 32 {
                 let mut snr = snr::SNR::<snr::SnrType32bit>::new(nc, *ns, np);
-                snr.update(x.view(), y.view());
+                let _ = snr.update(x.view(), y.view(), &config);
                 group.bench_with_input(BenchmarkId::new("get_snr", ns), ns, |b, ns| {
                     b.iter(|| {
                         let res = snr.get_snr();
@@ -24,7 +25,7 @@ fn bench_get_snr(c: &mut Criterion) {
             }
             if i == 64 {
                 let mut snr = snr::SNR::<snr::SnrType64bit>::new(nc, *ns, np);
-                snr.update(x.view(), y.view());
+                let _ = snr.update(x.view(), y.view(), &config);
                 group.bench_with_input(BenchmarkId::new("get_snr", ns), ns, |b, ns| {
                     b.iter(|| {
                         let res = snr.get_snr();
