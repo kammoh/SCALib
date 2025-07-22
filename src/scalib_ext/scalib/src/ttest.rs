@@ -10,6 +10,7 @@
 use itertools::izip;
 use ndarray::{s, Array1, Array2, Array3, ArrayView1, ArrayView2, ArrayView3, ArrayViewMut1, Axis};
 use num_integer::binomial;
+use num_traits::AsPrimitive;
 use rayon::prelude::*;
 use std::cmp;
 const NS_BATCH: usize = 1 << 12;
@@ -149,7 +150,11 @@ impl UniCSAcc {
     }
 
     /// Updates the current estimation with fresh traces.
-    pub fn update(&mut self, traces: ArrayView2<i16>, y: ArrayView1<u16>) {
+    pub fn update<T: AsPrimitive<i64> + AsPrimitive<f64>>(
+        &mut self,
+        traces: ArrayView2<T>,
+        y: ArrayView1<u16>,
+    ) {
         let mut sum = Array2::<i64>::zeros((self.nc, self.ns));
         let mut moments_other = Array3::<f64>::zeros((self.nc, self.d, self.ns));
         let mut n_traces = Array1::<u64>::zeros(self.nc);
@@ -180,7 +185,7 @@ impl UniCSAcc {
                 trace.view().to_slice().unwrap().iter()
             )
             .for_each(|(t, pow, m_full, trace)| {
-                *t = *trace as f64 - m_full;
+                *t = <T as AsPrimitive<f64>>::as_(*trace) - m_full;
                 *pow = *t;
             });
             for d in 2..(self.d + 1) {
@@ -234,7 +239,7 @@ impl Ttest {
     /// Update the Ttest state with n fresh traces
     /// traces: the leakage traces with shape (n,ns)
     /// y: realization of random variables with shape (n,)
-    pub fn update(&mut self, traces: ArrayView2<i16>, y: ArrayView1<u16>) {
+    pub fn update<T: AsPrimitive<i64> + AsPrimitive<f64> + Send + Sync> (&mut self, traces: ArrayView2<T>, y: ArrayView1<u16>) {
         let d = self.d;
         let ns = self.ns;
         let n_traces = traces.shape()[0];
@@ -407,8 +412,8 @@ pub fn gen_delta(m: &mut [f64], d: &mut [f64], t: &[i16], poi: &[u64], n: f64) {
 }
 
 #[inline(never)]
-pub fn acc_sum(m: &mut ArrayViewMut1<i64>, t: &ArrayView1<i16>) {
-    m.zip_mut_with(t, |m, t| *m += *t as i64);
+pub fn acc_sum<T: AsPrimitive<i64>>(m: &mut ArrayViewMut1<i64>, t: &ArrayView1<T>) {
+    m.zip_mut_with(t, |m, t| *m += t.as_());
 }
 
 #[inline(always)]
